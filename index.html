@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Global News & Market Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: #0b0f19; 
+            color: #f3f4f6; 
+            padding: 20px; 
+            text-align: center;
+        }
+        h1 { font-size: 2.8rem; font-weight: 800; background: linear-gradient(45deg, #3498db, #9966FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p { color: #9ca3af; font-size: 1.1rem; }
+        .box { 
+            background: rgba(255, 255, 255, 0.03); 
+            padding: 30px; 
+            border-radius: 16px; 
+            margin: 30px auto; 
+            max-width: 600px; 
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); 
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            display: none; 
+            transition: transform 0.3s ease;
+        }
+        .box:hover { transform: translateY(-5px); border-color: rgba(52, 152, 219, 0.4); }
+        select { padding: 12px; font-size: 16px; border-radius: 8px; margin-bottom: 20px; width: 100%; max-width: 300px; background: #111827; color: #fff; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; }
+        #loader { margin-top: 50px; font-size: 20px; color: #9ca3af; font-weight: bold; }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .buy-button { background: linear-gradient(135deg, #3498db, #9966FF); color: #fff; padding: 16px 36px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 18px; display: inline-block; margin-top: 30px; box-shadow: 0 4px 20px rgba(153, 102, 255, 0.4); transition: 0.3s; }
+        .buy-button:hover { transform: scale(1.03); box-shadow: 0 6px 25px rgba(153, 102, 255, 0.6); }
+    </style>
+</head>
+<body>
+    <h1>🌍 The News, Simplified</h1>
+    <p>Live tracking of global media headlines, business trends & stock markets.</p>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        Connecting to global news channels...<br>
+        <span style="font-size: 14px; font-weight: normal; color: #6b7280;">(This can take up to 50 seconds on the first visit)</span>
+    </div>
+    
+    <div class="box" id="pieBox">
+        <h2>What's on the News Right Now?</h2>
+        <canvas id="pieChart"></canvas>
+    </div>
+    
+    <div class="box" id="barBox">
+        <h2>News Volume Over Time</h2>
+        <select id="timeFilter" onchange="updateBarChart()">
+            <option value="1_day">Last 24 Hours</option>
+            <option value="1_week" selected>Last 1 Week</option>
+            <option value="1_month">Last 1 Month</option>
+            <option value="3_months">Last 3 Months</option>
+            <option value="6_months">Last 6 Months</option>
+            <option value="1_year">Last 1 Year</option>
+        </select>
+        <canvas id="barChart"></canvas>
+    </div>
+
+    <a href="YOUR_RAZORPAY_LINK_HERE" class="buy-button" target="_blank">🛒 Buy this Live Widget for your Website (₹3,999)</a>
+
+    <script>
+        const colors = ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#C9CBCF', '#8AC926'];
+        const API_URL = "razorpay.me/gauravsingh2353"; 
+        let barChartInstance = null; 
+
+        fetch(`${API_URL}/api/v1/current-cycle`)
+            .then(r => r.json())
+            .then(res => {
+                document.getElementById('loader').style.display = 'none';
+                
+                document.getElementById('pieBox').style.display = 'block';
+                document.getElementById('pieBox').className = 'box animate__animated animate__fadeInUp';
+                
+                document.getElementById('barBox').style.display = 'block';
+                document.getElementById('barBox').className = 'box animate__animated animate__fadeInUp';
+
+                new Chart(document.getElementById('pieChart'), {
+                    type: 'pie', 
+                    data: { labels: Object.keys(res.data), datasets: [{ data: Object.values(res.data), backgroundColor: colors, borderWidth: 0 }] },
+                    options: { plugins: { legend: { labels: { color: '#f3f4f6', font: { size: 13 } } } } }
+                });
+                
+                updateBarChart();
+            })
+            .catch(err => {
+                document.getElementById('loader').innerHTML = "Server waking up. Please refresh the page.";
+            });
+
+        function updateBarChart() {
+            const timeframe = document.getElementById("timeFilter").value;
+            fetch(`${API_URL}/api/v1/dynamic-trends?timeframe=${timeframe}`).then(r => r.json()).then(res => {
+                const genres = Object.keys(res.data);
+                const values = Object.values(res.data);
+                if (barChartInstance) barChartInstance.destroy();
+                barChartInstance = new Chart(document.getElementById('barChart'), {
+                    type: 'bar', 
+                    data: { labels: genres, datasets: [{ label: 'Articles', backgroundColor: colors, data: values, borderRadius: 8, borderSkipped: false }] },
+                    options: { 
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { ticks: { color: '#9ca3af' }, grid: { display: false } },
+                            y: { ticks: { color: '#9ca3af' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                        }
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>
