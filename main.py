@@ -21,7 +21,7 @@ GENRES = {
 
 # Advanced scanning keywords including Indian and Global Stock Markets
 KEYWORDS = {
-    "Politics": ["election", "government", "modi", "parliament", "president", "policy", "vote"],
+    "Politics": ["election", "government", "rahulgandhi", "modi", "parliament", "president", "policy", "vote"],
     "Sports": ["cricket", "ipl", "football", "soccer", "tennis", "nfl", "championship"],
     "Tech & AI": ["tech", "ai", "software", "apple", "google", "microsoft", "cyber", "gadget"],
     "Business & Stocks": ["market", "economy", "stocks", "inflation", "ceo", "nifty", "sensex", "shares", "crypto", "bitcoin"],
